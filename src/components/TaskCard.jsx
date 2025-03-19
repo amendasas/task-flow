@@ -1,12 +1,55 @@
 function TaskCard({ task, onDelete, onComplete }) {
+  // Função para calcular os dias restantes
+  const calculateDaysRemaining = (dueDate) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const timeDiff = due - today;
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    return daysRemaining;
+  };
+
+  const daysRemaining = calculateDaysRemaining(task.dueDate);
+
   return (
     <div
       className={`bg-dark p-4 rounded-lg shadow-md transition hover:shadow-lg hover:scale-105 duration-200 border ${
         task.completed ? "border-tealLight" : "border-tealDark"
       }`}
     >
-      <h2 className="text-xl font-semibold text-lightYellow break-words">{task.title}</h2> {/* Adicionando break-words */}
-      <p className="text-tealLight mt-2 break-words">{task.description}</p>
+      {/* Título da tarefa com estilo riscado se concluída */}
+      <h2
+        className={`text-xl font-semibold break-words ${
+          task.completed ? "line-through text-gray-500" : "text-lightYellow"
+        }`}
+      >
+        {task.title}
+      </h2>
+
+      {/* Descrição da tarefa com estilo riscado se concluída */}
+      <p
+        className={`mt-2 break-words ${
+          task.completed ? "line-through text-gray-500" : "text-tealLight"
+        }`}
+      >
+        {task.description}
+      </p>
+
+      {/* Data de conclusão e dias restantes */}
+      <div className="mt-2 text-sm text-gray-400">
+        <p>Data de Conclusão: {new Date(task.dueDate).toLocaleDateString()}</p>
+        {task.completed ? (
+          <p>Concluída em: {new Date(task.completedDate).toLocaleDateString()}</p>
+        ) : (
+          <p>
+            Dias Restantes:{" "}
+            <span className={daysRemaining < 0 ? "text-red-500" : "text-green-500"}>
+              {daysRemaining < 0 ? "Tarefa Atrasada" : `${daysRemaining} dias`}
+            </span>
+          </p>
+        )}
+      </div>
+
+      {/* Botões de ação */}
       <div className="mt-4 flex justify-between">
         <button
           className="bg-tealDark text-white px-3 py-1 rounded-lg hover:bg-tealLight transition"

@@ -5,53 +5,84 @@ import TaskCard from "../components/TaskCard";
 import Modal from "../components/Modal"; // Modal de confirmação de exclusão
 
 function Home() {
+  // Estado para gerenciar as tarefas
   const [tasks, setTasks] = useState([
-    { id: uuidv4(), title: "Estudar React", description: "Revisar componentes e hooks", completed: false },
-    { id: uuidv4(), title: "Criar layout do Task Flow", description: "Melhorar interface e design", completed: false },
-    { id: uuidv4(), title: "Assistir aula de microeletrônica", description: "Capítulo 2 - Amplificadores", completed: false },
+    { id: uuidv4(), title: "Estudar React", description: "Revisar componentes e hooks", completed: false, dueDate: "2025-12-31", completedDate: null },
+    { id: uuidv4(), title: "Criar layout do Task Flow", description: "Melhorar interface e design", completed: false, dueDate: "2025-11-15", completedDate: null },
+    { id: uuidv4(), title: "Assistir aula de microeletrônica", description: "Capítulo 2 - Amplificadores", completed: false, dueDate: "2025-10-30", completedDate: null },
   ]);
-  const [newTask, setNewTask] = useState({ title: "", description: "" });
-  const [isAddingTask, setIsAddingTask] = useState(false); // Controla o modal de adicionar tarefa
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState({ id: null, title: "" }); // Armazena id e nome da tarefa
-  const [showCompleted, setShowCompleted] = useState(false); // Controla qual lista de tarefas é exibida
 
-  const addTask = (title, description) => {
+  // Estado para o formulário de nova tarefa
+  const [newTask, setNewTask] = useState({ title: "", description: "", dueDate: "" });
+
+  // Estados para controlar modais e filtros
+  const [isAddingTask, setIsAddingTask] = useState(false); // Modal de adicionar tarefa
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal de confirmação de exclusão
+  const [taskToDelete, setTaskToDelete] = useState({ id: null, title: "" }); // Tarefa a ser excluída
+  const [showCompleted, setShowCompleted] = useState(false); // Filtro de tarefas concluídas
+
+  // Função para adicionar uma nova tarefa
+  const addTask = (title, description, dueDate) => {
+    // Validação dos campos
+    if (!title.trim() || !description.trim() || !dueDate) {
+      alert("Por favor, preencha todos os campos.");
+      return;
+    }
+
+    
+    // Cria a nova tarefa
     const newTask = {
-      id: uuidv4(), // Gera um id único usando uuid
+      id: uuidv4(), // Gera um id único
       title,
       description,
+      dueDate,
       completed: false,
+      completedDate: null, // Data de conclusão inicialmente nula
     };
+
+    // Atualiza a lista de tarefas
     setTasks([...tasks, newTask]);
-    setNewTask({ title: "", description: "" }); // Limpa o formulário
-    setIsAddingTask(false); // Fecha o modal de adicionar tarefa
+    setNewTask({ title: "", description: "", dueDate: "" }); // Limpa o formulário
+    setIsAddingTask(false); // Fecha o modal
   };
 
+  // Função para abrir o modal de exclusão
   const openDeleteModal = (id) => {
-    const task = tasks.find(task => task.id === id); // Obtém a tarefa pelo id
+    const task = tasks.find(task => task.id === id); // Encontra a tarefa pelo id
     setTaskToDelete({ id, title: task.title }); // Armazena o id e título da tarefa
     setIsModalOpen(true); // Abre o modal
   };
 
+  // Função para fechar o modal de exclusão
   const closeDeleteModal = () => {
     setIsModalOpen(false); // Fecha o modal
     setTaskToDelete({ id: null, title: "" }); // Reseta a tarefa selecionada
   };
 
+  // Função para confirmar a exclusão de uma tarefa
   const confirmDelete = () => {
-    const newTasks = tasks.filter(task => task.id !== taskToDelete.id);
+    const newTasks = tasks.filter(task => task.id !== taskToDelete.id); // Filtra a tarefa excluída
     setTasks(newTasks);
-    closeDeleteModal(); // Fecha o modal após a confirmação
+    closeDeleteModal(); // Fecha o modal
   };
 
+  // Função para marcar/desmarcar uma tarefa como concluída
   const completeTask = (id) => {
     const newTasks = tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
+      task.id === id
+        ? {
+            ...task,
+            completed: !task.completed,
+            completedDate: !task.completed
+              ? new Date(Date.now()).toISOString().split("T")[0] // Usa a data UTC
+              : null,
+          }
+        : task
     );
     setTasks(newTasks);
   };
 
+  // Função para atualizar os campos do formulário
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setNewTask((prev) => ({
@@ -60,11 +91,13 @@ function Home() {
     }));
   };
 
+  // Filtra as tarefas com base no estado "showCompleted"
   const filteredTasks = tasks.filter(task => showCompleted ? task.completed : !task.completed);
 
   return (
     <div className="bg-dark min-h-screen text-white">
       <Header setIsAddingTask={setIsAddingTask} />
+
       <div className="container mx-auto p-6">
         <h2 className="text-4xl font-semibold text-center mb-8 text-lightYellow">Minhas Tarefas</h2>
 
@@ -88,8 +121,11 @@ function Home() {
         {isAddingTask && (
           <Modal
             message="Adicionar Nova Tarefa"
-            onConfirm={() => addTask(newTask.title, newTask.description)}
-            onCancel={() => setIsAddingTask(false)}
+            onConfirm={() => addTask(newTask.title, newTask.description, newTask.dueDate)}
+            onCancel={() => {
+              setIsAddingTask(false);
+              setNewTask({ title: "", description: "", dueDate: "" }); // Reseta os campos ao cancelar
+            }}
             modalContent={
               <>
                 <input
@@ -99,17 +135,37 @@ function Home() {
                   value={newTask.title}
                   onChange={handleFormChange}
                   maxLength={50}
-                  className="bg-dark text-lightYellow p-3 mb-4 w-full border-b-2 border-tealLight focus:outline-none text-xl"
+                  className="bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 border-tealLight focus:outline-none text-xl"
                 />
+                <div className="text-right text-sm text-gray-500 mb-4">
+                  {newTask.title.length}/50
+                </div>
                 <textarea
                   name="description"
                   placeholder="Descrição"
                   value={newTask.description}
                   onChange={handleFormChange}
+                  onInput={(e) => {
+                    e.target.style.height = "auto"; // Reseta a altura antes de calcular
+                    e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta a altura conforme o conteúdo
+                  }}
                   maxLength={80}
-                  rows="3"
-                  className="bg-dark text-lightYellow p-3 mb-4 w-full border-b-2 border-tealLight focus:outline-none text-lg"
+                  rows="1"
+                  className="bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 border-tealLight focus:outline-none text-lg overflow-hidden resize-none"
                 />
+                <div className="text-right text-sm text-gray-500 mb-4">
+                  {newTask.description.length}/80
+                </div>
+                <div className="mb-4">
+                  <p className="text-xl font-semibold text-lightYellow mb-4">Quando deve concluir essa tarefa?</p>
+                  <input
+                    type="date"
+                    name="dueDate"
+                    value={newTask.dueDate}
+                    onChange={handleFormChange}
+                    className="bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 border-tealLight focus:outline-none text-lg overflow-hidden resize-none"
+                  />
+                </div>
               </>
             }
           />
@@ -123,9 +179,6 @@ function Home() {
               task={task}
               onDelete={() => openDeleteModal(task.id)} // Passa o id da tarefa
               onComplete={() => completeTask(task.id)} // Passa o id da tarefa
-              className={`${
-                task.completed ? 'bg-tealDark text-lightYellow' : 'bg-gray-800 text-white'
-              } p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300`}
             />
           ))}
         </div>
