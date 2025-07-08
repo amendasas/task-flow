@@ -1,4 +1,4 @@
-function TaskCard({ task, onDelete, onComplete }) {
+function TaskCard({ task, onDelete, onComplete, onEdit }) {
   // Função para calcular os dias restantes
   const calculateDaysRemaining = (dueDate) => {
     const today = new Date();
@@ -62,6 +62,12 @@ function TaskCard({ task, onDelete, onComplete }) {
           onClick={onDelete}
         >
           Excluir
+        </button>
+        <button
+          onClick={() => onEdit(task)}
+          className="bg-lightYellow text-gray-900 px-3 py-1 rounded-lg hover:bg-yellow-200 transition"
+        >
+          Editar
         </button>
       </div>
     </div>

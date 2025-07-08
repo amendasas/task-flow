@@ -12,7 +12,7 @@ function Modal({ message, onConfirm, onCancel, modalContent, onReset }) {
             Confirmar
           </button>
           <button
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+            className="bg-primary text-white px-3 py-1 rounded-lg hover:bg-red-600/50 transition"
             onClick={() => {
               if (onReset) onReset(); // Reseta os campos se a função foi passada
               onCancel();

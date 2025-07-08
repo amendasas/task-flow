@@ -22,6 +22,9 @@ function Home() {
   const [showCompleted, setShowCompleted] = useState(false); // Filtro de tarefas concluídas
   const [titleError, setTitleError] = useState(false);
   const [dueDateError, setDueDateError] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // controla o modo de edição
+  const [taskToEdit, setTaskToEdit] = useState(null); // armazena a tarefa selecionada para edição
+
 
  // Função para adicionar uma nova tarefa
   const addTask = (title, description, dueDate) => {
@@ -96,6 +99,45 @@ function Home() {
     }));
   };
 
+  //Função para iniciar edição
+  const startEditingTask = (task) => {
+    setTaskToEdit(task); // carrega os dados da tarefa no formulário
+    setNewTask({
+      title: task.title,
+      description: task.description,
+      dueDate: task.dueDate,
+    });
+    setIsEditing(true); // ativa o modal de edição
+  };
+
+
+  //Função para edição de tarefas
+  const updateTask = () => {
+  const isTitleEmpty = newTask.title.trim() === "";
+  const isDateEmpty = newTask.dueDate.trim() === "";
+
+  setTitleError(isTitleEmpty);
+  setDueDateError(isDateEmpty);
+
+  if (isTitleEmpty || isDateEmpty) return;
+
+  const updatedTasks = tasks.map((t) =>
+    t.id === taskToEdit.id
+      ? {
+          ...t,
+          title: newTask.title.trim(),
+          description: newTask.description.trim(),
+          dueDate: newTask.dueDate,
+        }
+      : t
+  );
+
+  setTasks(updatedTasks);
+  setIsEditing(false);
+  setTaskToEdit(null);
+  setNewTask({ title: "", description: "", dueDate: "" });
+};
+
   // Filtra as tarefas com base no estado "showCompleted"
   const filteredTasks = tasks.filter(task => showCompleted ? task.completed : !task.completed);
 
@@ -103,7 +145,7 @@ function Home() {
     <div className="bg-dark min-h-screen text-white">
       <Header setIsAddingTask={setIsAddingTask} />
 
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4">
         <h2 className="text-4xl font-semibold text-center mb-8 text-lightYellow">Minhas Tarefas</h2>
 
         {/* Botões de filtro */}
@@ -198,18 +240,103 @@ function Home() {
           />
         )}
 
-        {/* Exibe as tarefas filtradas */}
-        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {/* Modal de Edição de Tarefa */}
+        {isEditing && taskToEdit && (
+          <Modal
+            message={`Editar Tarefa: "${taskToEdit.title}"`}
+            onConfirm={() => {
+              const isTitleEmpty = newTask.title.trim() === "";
+              const isDateEmpty = newTask.dueDate.trim() === "";
+
+              setTitleError(isTitleEmpty);
+              setDueDateError(isDateEmpty);
+
+              if (isTitleEmpty || isDateEmpty) return;
+
+              updateTask(); // Chama a função de atualizar tarefa
+            }}
+            onCancel={() => {
+              setIsEditing(false);
+              setTaskToEdit(null);
+              setNewTask({ title: "", description: "", dueDate: "" });
+            }}
+            modalContent={
+              <>
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Título"
+                  value={newTask.title}
+                  onChange={(e) => {
+                    handleFormChange(e);
+                    setTitleError(false);
+                  }}
+                  maxLength={50}
+                  className={`bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 focus:outline-none text-xl transition-all duration-300
+                    ${titleError ? "border-red-500 animate-shake" : "border-tealLight"}
+                  `}
+                />
+                <div className="text-right text-sm text-gray-500 mb-4">
+                  {newTask.title.length}/50
+                </div>
+                <textarea
+                  name="description"
+                  placeholder="Descrição"
+                  value={newTask.description}
+                  onChange={handleFormChange}
+                  onInput={(e) => {
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  maxLength={80}
+                  rows="1"
+                  className="bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 border-tealLight focus:outline-none text-lg overflow-hidden resize-none"
+                />
+                <div className="text-right text-sm text-gray-500 mb-4">
+                  {newTask.description.length}/80
+                </div>
+                <div className="mb-4">
+                  <p className="text-xl font-semibold text-lightYellow mb-4">Quando deve concluir essa tarefa?</p>
+                  <input
+                    type="date"
+                    name="dueDate"
+                    value={newTask.dueDate}
+                    onChange={(e) => {
+                      handleFormChange(e);
+                      setDueDateError(false);
+                    }}
+                    className={`bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 focus:outline-none text-lg transition-all duration-300
+                      ${dueDateError ? "border-red-500 animate-shake" : "border-tealLight"}
+                    `}
+                  />
+                </div>
+              </>
+            }
+          />
+        )}            
+      </div>
+
+      {/* Exibe as tarefas filtradas ou mensagem caso esteja vazio */}
+      {filteredTasks.length === 0 ? (
+        <p className="text-center text-gray-400 mt-15 text-xl">
+          Ainda não há nada aqui.
+        </p>
+      ) : (
+        <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {filteredTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onDelete={() => openDeleteModal(task.id)} // Passa o id da tarefa
-              onComplete={() => completeTask(task.id)} // Passa o id da tarefa
-            />
+            <div className="px-6">
+              <TaskCard
+                key={task.id}
+                task={task}
+                onDelete={() => openDeleteModal(task.id)}
+                onComplete={() => completeTask(task.id)}
+                onEdit={() => startEditingTask(task)}
+              />
+            </div>
           ))}
         </div>
-      </div>
+      )}
+
 
       {/* Modal de confirmação de exclusão */}
       {isModalOpen && (
