@@ -36,9 +36,9 @@ function TaskCard({ task, onDelete, onComplete }) {
 
       {/* Data de conclusão e dias restantes */}
       <div className="mt-2 text-sm text-gray-400">
-        <p>Data de Conclusão: {new Date(task.dueDate).toLocaleDateString()}</p>
+      <p>Data de Conclusão: {new Date(task.dueDate + 'T00:00:00').toLocaleDateString()}</p>
         {task.completed ? (
-          <p>Concluída em: {new Date(task.completedDate).toLocaleDateString()}</p>
+          <p>Concluída em: {new Date(task.completedDate + 'T00:00:00').toLocaleDateString()}</p>
         ) : (
           <p>
             Dias Restantes:{" "}
