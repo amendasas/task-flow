@@ -20,31 +20,36 @@ function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal de confirmação de exclusão
   const [taskToDelete, setTaskToDelete] = useState({ id: null, title: "" }); // Tarefa a ser excluída
   const [showCompleted, setShowCompleted] = useState(false); // Filtro de tarefas concluídas
+  const [titleError, setTitleError] = useState(false);
+  const [dueDateError, setDueDateError] = useState(false);
 
-  // Função para adicionar uma nova tarefa
+ // Função para adicionar uma nova tarefa
   const addTask = (title, description, dueDate) => {
-    // Validação dos campos
-    if (!title.trim() || !description.trim() || !dueDate) {
-      alert("Por favor, preencha todos os campos.");
-      return;
+    const isTitleEmpty = title.trim() === "";
+    const isDateEmpty = dueDate.trim() === "";
+
+    // Validação visual já está no modal, não precisa de alert
+    setTitleError(isTitleEmpty);
+    setDueDateError(isDateEmpty);
+
+    if (isTitleEmpty || isDateEmpty) {
+      return; // Não adiciona se título ou data estiverem vazios
     }
 
-    
-    // Cria a nova tarefa
-    const newTask = {
-      id: uuidv4(), // Gera um id único
-      title,
-      description,
+    const novaTarefa = {
+      id: uuidv4(),
+      title: title.trim(),
+      description: description.trim(), // Descrição pode estar vazia
       dueDate,
       completed: false,
-      completedDate: null, // Data de conclusão inicialmente nula
+      completedDate: null,
     };
 
-    // Atualiza a lista de tarefas
-    setTasks([...tasks, newTask]);
-    setNewTask({ title: "", description: "", dueDate: "" }); // Limpa o formulário
+    setTasks([...tasks, novaTarefa]);
+    setNewTask({ title: "", description: "", dueDate: "" }); // Limpa os campos
     setIsAddingTask(false); // Fecha o modal
   };
+
 
   // Função para abrir o modal de exclusão
   const openDeleteModal = (id) => {
@@ -121,7 +126,19 @@ function Home() {
         {isAddingTask && (
           <Modal
             message="Adicionar Nova Tarefa"
-            onConfirm={() => addTask(newTask.title, newTask.description, newTask.dueDate)}
+            onConfirm={() => {
+              const isTitleEmpty = newTask.title.trim() === "";
+              const isDateEmpty = newTask.dueDate.trim() === "";
+
+              setTitleError(isTitleEmpty);
+              setDueDateError(isDateEmpty);
+
+              if (isTitleEmpty || isDateEmpty) {
+                return; // Não prossegue se houver erro
+              }
+
+              addTask(newTask.title, newTask.description, newTask.dueDate);
+            }}
             onCancel={() => {
               setIsAddingTask(false);
               setNewTask({ title: "", description: "", dueDate: "" }); // Reseta os campos ao cancelar
@@ -133,9 +150,14 @@ function Home() {
                   name="title"
                   placeholder="Título"
                   value={newTask.title}
-                  onChange={handleFormChange}
+                  onChange={(e) => {
+                    handleFormChange(e);
+                    setTitleError(false); // Limpa erro ao digitar
+                  }}
                   maxLength={50}
-                  className="bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 border-tealLight focus:outline-none text-xl"
+                  className={`bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 focus:outline-none text-xl transition-all duration-300
+                    ${titleError ? "border-red-500 animate-shake" : "border-tealLight"}
+                  `}
                 />
                 <div className="text-right text-sm text-gray-500 mb-4">
                   {newTask.title.length}/50
@@ -162,8 +184,13 @@ function Home() {
                     type="date"
                     name="dueDate"
                     value={newTask.dueDate}
-                    onChange={handleFormChange}
-                    className="bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 border-tealLight focus:outline-none text-lg overflow-hidden resize-none"
+                    onChange={(e) => {
+                      handleFormChange(e);
+                      setDueDateError(false); // Limpa erro ao alterar data
+                    }}
+                    className={`bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 focus:outline-none text-lg transition-all duration-300
+                      ${dueDateError ? "border-red-500 animate-shake" : "border-tealLight"}
+                    `}
                   />
                 </div>
               </>
