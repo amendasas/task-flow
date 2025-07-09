@@ -337,7 +337,6 @@ function Home() {
         </div>
       )}
 
-
       {/* Modal de confirmação de exclusão */}
       {isModalOpen && (
         <Modal

@@ -5,7 +5,7 @@ function Header({ setIsAddingTask }) {
         <h1 className="text-2xl font-bold text-lightYellow">Task Flow</h1>
         <button
           className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-tealDark transition"
-          onClick={() => setIsAddingTask(true)} // Chama a função para abrir o modal
+          onClick={() => setIsAddingTask(true)} // ch
         >
           Nova Tarefa
         </button>
