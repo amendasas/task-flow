@@ -24,6 +24,8 @@ function Home() {
   const [dueDateError, setDueDateError] = useState(false);
   const [isEditing, setIsEditing] = useState(false); // controla o modo de edição
   const [taskToEdit, setTaskToEdit] = useState(null); // armazena a tarefa selecionada para edição
+  const [pastDateError, setPastDateError] = useState(false);
+
 
 
  // Função para adicionar uma nova tarefa
@@ -35,9 +37,19 @@ function Home() {
     setTitleError(isTitleEmpty);
     setDueDateError(isDateEmpty);
 
-    if (isTitleEmpty || isDateEmpty) {
-      return; // Não adiciona se título ou data estiverem vazios
-    }
+    // Normaliza a data atual para comparação (apenas ano, mês, dia)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+    // Normaliza a data de vencimento para comparação
+    const taskDueDate = new Date(dueDate);
+    taskDueDate.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+    const isPastDate = taskDueDate.getTime() < today.getTime();
+    setPastDateError(isPastDate);
+
+    if (isTitleEmpty || isDateEmpty || isPastDate) return;
+
 
     const novaTarefa = {
       id: uuidv4(),
@@ -119,7 +131,18 @@ function Home() {
   setTitleError(isTitleEmpty);
   setDueDateError(isDateEmpty);
 
-  if (isTitleEmpty || isDateEmpty) return;
+  // Normaliza a data atual para comparação (apenas ano, mês, dia)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+  // Normaliza a data de vencimento para comparação
+  const taskDueDate = new Date(newTask.dueDate);
+  taskDueDate.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+  const isPastDate = taskDueDate < today;
+  setPastDateError(isPastDate);
+
+  if (isTitleEmpty || isDateEmpty || isPastDate) return;
 
   const updatedTasks = tasks.map((t) =>
     t.id === taskToEdit.id
@@ -175,7 +198,19 @@ function Home() {
               setTitleError(isTitleEmpty);
               setDueDateError(isDateEmpty);
 
-              if (isTitleEmpty || isDateEmpty) {
+              // Normaliza a data atual para comparação (apenas ano, mês, dia)
+              const today = new Date();
+              today.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+              // Normaliza a data de vencimento para comparação
+              const taskDueDate = new Date(newTask.dueDate);
+              taskDueDate.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+              const isPastDate = taskDueDate < today;
+              setPastDateError(isPastDate);
+
+
+              if (isTitleEmpty || isDateEmpty || isPastDate) {
                 return; // Não prossegue se houver erro
               }
 
@@ -228,12 +263,16 @@ function Home() {
                     value={newTask.dueDate}
                     onChange={(e) => {
                       handleFormChange(e);
-                      setDueDateError(false); // Limpa erro ao alterar data
+                      setDueDateError(false);
+                      setPastDateError(false);
                     }}
                     className={`bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 focus:outline-none text-lg transition-all duration-300
                       ${dueDateError ? "border-red-500 animate-shake" : "border-tealLight"}
                     `}
                   />
+                  {pastDateError && (
+                    <p className="text-red-500 text-sm italic mb-2">Escolha uma data futura ou atual.</p>
+                  )}
                 </div>
               </>
             }
@@ -251,7 +290,18 @@ function Home() {
               setTitleError(isTitleEmpty);
               setDueDateError(isDateEmpty);
 
-              if (isTitleEmpty || isDateEmpty) return;
+              // Normaliza a data atual para comparação (apenas ano, mês, dia)
+              const today = new Date();
+              today.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+              // Normaliza a data de vencimento para comparação
+              const taskDueDate = new Date(newTask.dueDate);
+              taskDueDate.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas a data
+
+              const isPastDate = taskDueDate < today;
+              setPastDateError(isPastDate);
+
+              if (isTitleEmpty || isDateEmpty || isPastDate) return;
 
               updateTask(); // Chama a função de atualizar tarefa
             }}
@@ -304,11 +354,15 @@ function Home() {
                     onChange={(e) => {
                       handleFormChange(e);
                       setDueDateError(false);
+                      setPastDateError(false); // Limpa o erro de data passada ao digitar
                     }}
                     className={`bg-dark text-lightYellow p-3 mb-2 w-full border-b-2 focus:outline-none text-lg transition-all duration-300
                       ${dueDateError ? "border-red-500 animate-shake" : "border-tealLight"}
                     `}
                   />
+                  {pastDateError && (
+                    <p className="text-red-500 text-sm italic mb-2">Escolha uma data futura ou atual.</p>
+                  )}
                 </div>
               </>
             }
