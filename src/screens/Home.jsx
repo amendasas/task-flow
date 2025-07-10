@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import Header from "../components/Header";
 import TaskCard from "../components/TaskCard";
 import Modal from "../components/Modal";
+import Footer from "../components/Footer";
 import { useTaskStorage } from "../hooks/useLocalStorage";
 import { useToast } from "../components/Toast";
 
@@ -37,6 +38,84 @@ function Home() {
   const [isEditing, setIsEditing] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [pastDateError, setPastDateError] = useState(false);
+  
+  // Estado para controlar o tipo de ordenação
+  const [sortType, setSortType] = useState('priority'); // 'priority' ou 'creation'
+
+  // Função para calcular os dias restantes
+  const calculateDaysRemaining = (dueDate) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const timeDiff = due - today;
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24) + 1);
+    return daysRemaining;
+  };
+
+  // Função para determinar a prioridade da tarefa
+  const getTaskPriority = (task) => {
+    if (task.completed) return 0; // Tarefas concluídas têm prioridade baixa
+    
+    const daysRemaining = calculateDaysRemaining(task.dueDate);
+    
+    if (daysRemaining < 0) return 5; // Atrasadas - prioridade máxima
+    if (daysRemaining === 0) return 4; // Vence hoje - prioridade alta
+    if (daysRemaining <= 3) return 3; // Vence em poucos dias - prioridade média-alta
+    if (daysRemaining <= 7) return 2; // Vence na próxima semana - prioridade média
+    return 1; // Outras - prioridade baixa
+  };
+
+  // Função para ordenar tarefas por prioridade
+  const sortTasksByPriority = (tasksToSort) => {
+    return [...tasksToSort].sort((a, b) => {
+      const priorityA = getTaskPriority(a);
+      const priorityB = getTaskPriority(b);
+      
+      // Se as prioridades forem diferentes, ordena por prioridade (maior primeiro)
+      if (priorityA !== priorityB) {
+        return priorityB - priorityA;
+      }
+      
+      // Se as prioridades forem iguais, ordena por data de vencimento (mais próxima primeiro)
+      const dateA = new Date(a.dueDate);
+      const dateB = new Date(b.dueDate);
+      return dateA - dateB;
+    });
+  };
+
+  // Função para ordenar tarefas por data de criação
+  const sortTasksByCreation = (tasksToSort) => {
+    return [...tasksToSort].sort((a, b) => {
+      // Tarefas concluídas vão para o final
+      if (a.completed && !b.completed) return 1;
+      if (!a.completed && b.completed) return -1;
+      
+      // Ordena por data de criação (mais recentes primeiro)
+      const dateA = new Date(a.createdAt || a.id); // Fallback para ID se não tiver createdAt
+      const dateB = new Date(b.createdAt || b.id);
+      return dateB - dateA;
+    });
+  };
+
+  // Função principal de ordenação
+  const sortTasks = (tasksToSort) => {
+    if (sortType === 'priority') {
+      return sortTasksByPriority(tasksToSort);
+    } else {
+      return sortTasksByCreation(tasksToSort);
+    }
+  };
+
+  // Função para alternar tipo de ordenação
+  const toggleSortType = () => {
+    const newSortType = sortType === 'priority' ? 'creation' : 'priority';
+    setSortType(newSortType);
+    
+    // Notificação sobre a mudança
+    const message = newSortType === 'priority' 
+      ? 'Ordenação alterada para: Prioridade (mais urgentes primeiro)'
+      : 'Ordenação alterada para: Data de criação (mais recentes primeiro)';
+    showToast(message, 'info');
+  };
 
   // Função para validar o formulário
   const validateForm = () => {
@@ -158,8 +237,9 @@ function Home() {
     setPastDateError(false);
   };
 
-  // Filtrar tarefas
+  // Filtrar e ordenar tarefas
   const filteredTasks = tasks.filter(task => showCompleted ? task.completed : !task.completed);
+  const sortedTasks = sortTasks(filteredTasks);
 
   // Estatísticas das tarefas
   const taskStats = {
@@ -168,9 +248,7 @@ function Home() {
     pending: tasks.filter(t => !t.completed).length,
     overdue: tasks.filter(t => {
       if (t.completed) return false;
-      const today = new Date();
-      const dueDate = new Date(t.dueDate);
-      return dueDate < today;
+      return calculateDaysRemaining(t.dueDate) < 0;
     }).length
   };
 
@@ -255,14 +333,14 @@ function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
       <Header setIsAddingTask={setIsAddingTask} />
       
       {/* Container de notificações */}
       <ToastContainer />
       
       {/* Container principal com melhor espaçamento */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
         
         {/* Cabeçalho da seção com estatísticas */}
         <div className="text-center mb-12">
@@ -270,6 +348,27 @@ function Home() {
             Minhas Tarefas
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-tealLight to-tealDark rounded-full mx-auto mb-6"></div>
+          
+          {/* Botão de ordenação */}
+          <div className="mb-6">
+            <button
+              onClick={toggleSortType}
+              className="group inline-flex items-center space-x-3 bg-gray-800/50 hover:bg-gray-700/50 px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <svg className="w-5 h-5 text-tealLight transition-transform group-hover:rotate-180 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+              <span className="text-gray-300 text-sm font-medium">
+                {sortType === 'priority' 
+                  ? 'Ordenado por prioridade (mais urgentes primeiro)' 
+                  : 'Ordenado por data de criação (mais recentes primeiro)'
+                }
+              </span>
+              <svg className="w-4 h-4 text-gray-400 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </button>
+          </div>
           
           {/* Estatísticas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
@@ -356,7 +455,7 @@ function Home() {
         )}
 
         {/* Lista de tarefas com melhor layout */}
-        {filteredTasks.length === 0 ? (
+        {sortedTasks.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -375,7 +474,7 @@ function Home() {
           </div>
         ) : (
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
-            {filteredTasks.map((task) => (
+            {sortedTasks.map((task) => (
               <TaskCard
                 key={task.id}
                 task={task}
@@ -414,8 +513,12 @@ function Home() {
           />
         )}
       </div>
+
+      {/* Rodapé */}
+      <Footer />
     </div>
   );
 }
 
 export default Home;
+
