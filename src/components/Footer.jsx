@@ -92,7 +92,7 @@ function Footer() {
           <div className="text-center md:text-left">
             <p className="text-gray-400 text-sm">
               © {new Date().getFullYear()} Task Flow. Desenvolvido com 
-              <span className="text-red-400 mx-1">♥</span>
+              <span className="text-blue-400 mx-1">♥</span>
               por Amanda Paulino
             </p>
           </div>

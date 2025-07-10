@@ -112,8 +112,8 @@ function Home() {
     
     // Notificação sobre a mudança
     const message = newSortType === 'priority' 
-      ? 'Ordenação alterada para: Prioridade (mais urgentes primeiro)'
-      : 'Ordenação alterada para: Data de criação (mais recentes primeiro)';
+      ? 'Ordenação alterada para: Prioridade'
+      : 'Ordenação alterada para: Data de criação';
     showToast(message, 'info');
   };
 
@@ -275,7 +275,7 @@ function Home() {
         />
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-400">
-            {titleError && <span className="text-red-400">⚠ Título é obrigatório</span>}
+            {titleError && <span className="text-red-400">Título é obrigatório</span>}
           </div>
           <div className="text-sm text-gray-400">
             {newTask.title.length}/50
@@ -325,8 +325,8 @@ function Home() {
           }`}
         />
         <div className="text-sm">
-          {dueDateError && <span className="text-red-400">⚠ Data é obrigatória</span>}
-          {pastDateError && <span className="text-red-400">⚠ Escolha uma data futura ou atual</span>}
+          {dueDateError && <span className="text-red-400">Data é obrigatória</span>}
+          {pastDateError && <span className="text-red-400">Escolha uma data futura ou atual</span>}
         </div>
       </div>
     </div>
@@ -360,8 +360,8 @@ function Home() {
               </svg>
               <span className="text-gray-300 text-sm font-medium">
                 {sortType === 'priority' 
-                  ? 'Ordenado por prioridade (mais urgentes primeiro)' 
-                  : 'Ordenado por data de criação (mais recentes primeiro)'
+                  ? 'Ordenado por prioridade' 
+                  : 'Ordenado por data de criação'
                 }
               </span>
               <svg className="w-4 h-4 text-gray-400 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
