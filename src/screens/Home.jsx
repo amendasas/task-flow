@@ -4,10 +4,23 @@ import Header from "../components/Header";
 import TaskCard from "../components/TaskCard";
 import Modal from "../components/Modal";
 import Footer from "../components/Footer";
+import SearchAndFilters from "../components/SearchAndFilters";
 import { useTaskStorage } from "../hooks/useLocalStorage";
 import { useToast } from "../components/Toast";
 
 function Home() {
+  // Categorias predefinidas
+  const categories = [
+    { id: 'trabalho', name: 'Trabalho', color: 'bg-blue-500' },
+    { id: 'pessoal', name: 'Pessoal', color: 'bg-green-500' },
+    { id: 'estudos', name: 'Estudos', color: 'bg-purple-500' },
+    { id: 'compras', name: 'Compras', color: 'bg-orange-500' },
+    { id: 'saude', name: 'Saúde', color: 'bg-red-500' },
+    { id: 'lazer', name: 'Lazer', color: 'bg-pink-500' },
+    { id: 'financas', name: 'Finanças', color: 'bg-yellow-500' },
+    { id: 'casa', name: 'Casa', color: 'bg-indigo-500' }
+  ];
+
   // Tarefas padrão apenas para primeira execução
   const defaultTasks = [
     { 
@@ -17,7 +30,8 @@ function Home() {
       completed: false, 
       dueDate: "2025-12-31", 
       completedDate: null,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      category: 'pessoal'
     }
   ];
 
@@ -28,7 +42,7 @@ function Home() {
   const { showToast, ToastContainer } = useToast();
 
   // Estados do formulário e UI
-  const [newTask, setNewTask] = useState({ title: "", description: "", dueDate: "" });
+  const [newTask, setNewTask] = useState({ title: "", description: "", dueDate: "", category: "" });
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState({ id: null, title: "" });
@@ -39,15 +53,27 @@ function Home() {
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [pastDateError, setPastDateError] = useState(false);
   
+  // Estados para pesquisa e filtros
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  
   // Estado para controlar o tipo de ordenação
   const [sortType, setSortType] = useState('priority'); // 'priority' ou 'creation'
 
-  // Função para calcular os dias restantes
+  // Função para calcular os dias restantes (corrigida)
   const calculateDaysRemaining = (dueDate) => {
+    // Normalizar a data atual para o início do dia
     const today = new Date();
-    const due = new Date(dueDate);
-    const timeDiff = due - today;
-    const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24) + 1);
+    const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    // Normalizar a data de vencimento para o início do dia
+    const due = new Date(dueDate + 'T00:00:00');
+    const dueNormalized = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+    
+    // Calcular a diferença em dias
+    const timeDiff = dueNormalized.getTime() - todayNormalized.getTime();
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    
     return daysRemaining;
   };
 
@@ -117,6 +143,30 @@ function Home() {
     showToast(message, 'info');
   };
 
+  // Função para filtrar tarefas
+  const filterTasks = (tasksToFilter) => {
+    let filtered = tasksToFilter;
+
+    // Filtrar por status (concluídas/pendentes)
+    filtered = filtered.filter(task => showCompleted ? task.completed : !task.completed);
+
+    // Filtrar por categoria
+    if (selectedCategory) {
+      filtered = filtered.filter(task => task.category === selectedCategory);
+    }
+
+    // Filtrar por termo de pesquisa
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(task => 
+        task.title.toLowerCase().includes(search) ||
+        task.description.toLowerCase().includes(search)
+      );
+    }
+
+    return filtered;
+  };
+
   // Função para validar o formulário
   const validateForm = () => {
     const isTitleEmpty = newTask.title.trim() === "";
@@ -129,14 +179,9 @@ function Home() {
       return false;
     }
 
-    // Normaliza a data atual para o início do dia em UTC
-    const today = new Date();
-    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-
-    // O construtor new Date('AAAA-MM-DD') já interpreta a string como UTC.
-    const taskDueDate = new Date(newTask.dueDate);
-
-    const isPastDate = taskDueDate.getTime() < todayUTC.getTime();
+    // Usar a mesma lógica de cálculo de dias para validação
+    const daysRemaining = calculateDaysRemaining(newTask.dueDate);
+    const isPastDate = daysRemaining < 0;
     setPastDateError(isPastDate);
 
     return !isPastDate;
@@ -151,13 +196,14 @@ function Home() {
       title: newTask.title.trim(),
       description: newTask.description.trim(),
       dueDate: newTask.dueDate,
+      category: newTask.category || 'pessoal', // Categoria padrão
       completed: false,
       completedDate: null,
       createdAt: new Date().toISOString()
     };
 
     addTask(novaTarefa);
-    setNewTask({ title: "", description: "", dueDate: "" });
+    setNewTask({ title: "", description: "", dueDate: "", category: "" });
     setIsAddingTask(false);
     
     // Notificação de sucesso
@@ -172,13 +218,14 @@ function Home() {
       title: newTask.title.trim(),
       description: newTask.description.trim(),
       dueDate: newTask.dueDate,
+      category: newTask.category || taskToEdit.category,
       updatedAt: new Date().toISOString()
     };
 
     updateTask(taskToEdit.id, updatedTaskData);
     setIsEditing(false);
     setTaskToEdit(null);
-    setNewTask({ title: "", description: "", dueDate: "" });
+    setNewTask({ title: "", description: "", dueDate: "", category: "" });
     
     // Notificação de sucesso
     showToast(`Tarefa "${updatedTaskData.title}" atualizada com sucesso!`, 'success');
@@ -226,35 +273,52 @@ function Home() {
       title: task.title,
       description: task.description,
       dueDate: task.dueDate,
+      category: task.category || ''
     });
     setIsEditing(true);
   };
 
   const resetForm = () => {
-    setNewTask({ title: "", description: "", dueDate: "" });
+    setNewTask({ title: "", description: "", dueDate: "", category: "" });
     setTitleError(false);
     setDueDateError(false);
     setPastDateError(false);
   };
 
   // Filtrar e ordenar tarefas
-  const filteredTasks = tasks.filter(task => showCompleted ? task.completed : !task.completed);
+  const filteredTasks = filterTasks(tasks);
   const sortedTasks = sortTasks(filteredTasks);
 
-  // Estatísticas das tarefas
+  // Calcular estatísticas das tarefas (corrigido)
   const taskStats = {
     total: tasks.length,
     completed: tasks.filter(t => t.completed).length,
     pending: tasks.filter(t => !t.completed).length,
     overdue: tasks.filter(t => {
       if (t.completed) return false;
-      return calculateDaysRemaining(t.dueDate) < 0;
-    }).length
+      const daysRemaining = calculateDaysRemaining(t.dueDate);
+      return daysRemaining < 0;
+    }).length,
+    dueToday: tasks.filter(t => {
+      if (t.completed) return false;
+      const daysRemaining = calculateDaysRemaining(t.dueDate);
+      return daysRemaining === 0;
+    }).length,
+    dueSoon: tasks.filter(t => {
+      if (t.completed) return false;
+      const daysRemaining = calculateDaysRemaining(t.dueDate);
+      return daysRemaining > 0 && daysRemaining <= 3;
+    }).length,
+    completionRate: tasks.length > 0 ? Math.round((tasks.filter(t => t.completed).length / tasks.length) * 100) : 0,
+    byCategory: categories.reduce((acc, cat) => {
+      acc[cat.id] = tasks.filter(t => t.category === cat.id).length;
+      return acc;
+    }, {})
   };
 
   const formContent = (
     <div className="space-y-6">
-      {/* Campo de título com melhor design */}
+      {/* Campo de título */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-lightYellow">
           Título da Tarefa
@@ -283,7 +347,27 @@ function Home() {
         </div>
       </div>
 
-      {/* Campo de descrição com melhor design */}
+      {/* Campo de categoria */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-lightYellow">
+          Categoria
+        </label>
+        <select
+          name="category"
+          value={newTask.category}
+          onChange={handleFormChange}
+          className="w-full p-4 bg-gray-800 text-white rounded-xl border-2 border-gray-600 focus:border-tealLight focus:outline-none text-lg transition-all duration-300"
+        >
+          <option value="">Selecione uma categoria</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Campo de descrição */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-lightYellow">
           Descrição (Opcional)
@@ -306,7 +390,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Campo de data com melhor design */}
+      {/* Campo de data */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-lightYellow">
           Data de Vencimento
@@ -339,10 +423,10 @@ function Home() {
       {/* Container de notificações */}
       <ToastContainer />
       
-      {/* Container principal com melhor espaçamento */}
+      {/* Container principal */}
       <div className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
         
-        {/* Cabeçalho da seção com estatísticas */}
+        {/* Cabeçalho da seção */}
         <div className="text-center mb-12">
           <h2 className="text-5xl font-bold bg-gradient-to-r from-lightYellow to-tealLight bg-clip-text text-transparent mb-4">
             Minhas Tarefas
@@ -369,64 +453,19 @@ function Home() {
               </svg>
             </button>
           </div>
-          
-          {/* Estatísticas */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-            <div className="bg-gray-800/50 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-white">{taskStats.total}</div>
-              <div className="text-sm text-gray-400">Total</div>
-            </div>
-            <div className="bg-green-500/20 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-green-400">{taskStats.completed}</div>
-              <div className="text-sm text-gray-400">Concluídas</div>
-            </div>
-            <div className="bg-blue-500/20 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-blue-400">{taskStats.pending}</div>
-              <div className="text-sm text-gray-400">Pendentes</div>
-            </div>
-            <div className="bg-red-500/20 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-red-400">{taskStats.overdue}</div>
-              <div className="text-sm text-gray-400">Atrasadas</div>
-            </div>
-          </div>
         </div>
 
-        {/* Botões de filtro com melhor design e simetria */}
-        <div className="flex justify-center gap-4 mb-12">
-          <button 
-            onClick={() => setShowCompleted(false)} 
-            className={`group px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-3 ${
-              !showCompleted 
-                ? 'bg-gradient-to-r from-tealDark to-tealLight text-white shadow-lg' 
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <span>Tarefas Pendentes</span>
-            <span className="bg-white/20 px-2 py-1 rounded-full text-sm">
-              {taskStats.pending}
-            </span>
-          </button>
-          
-          <button 
-            onClick={() => setShowCompleted(true)} 
-            className={`group px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-3 ${
-              showCompleted 
-                ? 'bg-gradient-to-r from-tealDark to-tealLight text-white shadow-lg' 
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Tarefas Concluídas</span>
-            <span className="bg-white/20 px-2 py-1 rounded-full text-sm">
-              {taskStats.completed}
-            </span>
-          </button>
-        </div>
+        {/* Componente de pesquisa e filtros */}
+        <SearchAndFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          categories={categories}
+          taskStats={taskStats}
+          showCompleted={showCompleted}
+          onToggleCompleted={setShowCompleted}
+        />
 
         {/* Modais */}
         {isAddingTask && (
@@ -454,30 +493,42 @@ function Home() {
           />
         )}
 
-        {/* Lista de tarefas com melhor layout */}
+        {/* Lista de tarefas */}
         {sortedTasks.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-20 mt-12">
             <div className="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-400 mb-2">
-              {showCompleted ? "Nenhuma tarefa concluída" : "Nenhuma tarefa pendente"}
+              {searchTerm ? "Nenhuma tarefa encontrada" : 
+               showCompleted ? "Nenhuma tarefa concluída" : "Nenhuma tarefa pendente"}
             </h3>
             <p className="text-gray-500 text-lg">
-              {showCompleted 
-                ? "Complete algumas tarefas para vê-las aqui!" 
-                : "Clique em 'Nova Tarefa' para começar!"
-              }
+              {searchTerm ? `Tente pesquisar por "${searchTerm}" com outros filtros` :
+               showCompleted ? "Complete algumas tarefas para vê-las aqui!" : 
+               "Clique em 'Nova Tarefa' para começar!"}
             </p>
+            {(searchTerm || selectedCategory) && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('');
+                }}
+                className="mt-4 px-6 py-2 bg-tealDark hover:bg-tealLight text-white rounded-xl transition-all duration-300"
+              >
+                Limpar Filtros
+              </button>
+            )}
           </div>
         ) : (
-          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 mt-12">
             {sortedTasks.map((task) => (
               <TaskCard
                 key={task.id}
                 task={task}
+                categories={categories}
                 onDelete={() => openDeleteModal(task.id)}
                 onComplete={() => handleCompleteTask(task.id)}
                 onEdit={() => startEditingTask(task)}
