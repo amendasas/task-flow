@@ -27,18 +27,22 @@
   --gradient-primary: linear-gradient(135deg, #111827 0%, #1f2937 50%, #111827 100%);
   --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #374151 100%);
   --gradient-accent: linear-gradient(135deg, #13747d 0%, #0abfbc 100%);
+  
+  /* Sombras - tema escuro */
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color-light: rgba(0, 0, 0, 0.1);
 }
 
 /* Tema Claro */
 [data-theme="light"] {
-  --color-bg-primary: #f9fafb;
-  --color-bg-secondary: #ffffff;
-  --color-bg-tertiary: #f3f4f6;
-  --color-text-primary: #111827;
-  --color-text-secondary: #374151;
-  --color-text-muted: #6b7280;
-  --color-border: #d1d5db;
-  --color-border-light: #e5e7eb;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-tertiary: #f1f5f9;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-border: #cbd5e1;
+  --color-border-light: #e2e8f0;
   
   /* Cores de status - tema claro */
   --color-success: #059669;
@@ -47,9 +51,13 @@
   --color-info: #2563eb;
   
   /* Gradientes - tema claro */
-  --gradient-primary: linear-gradient(135deg, #f9fafb 0%, #ffffff 50%, #f3f4f6 100%);
-  --gradient-secondary: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
+  --gradient-secondary: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   --gradient-accent: linear-gradient(135deg, #13747d 0%, #0abfbc 100%);
+  
+  /* Sombras - tema claro */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
 }
 
 /* Classes utilitárias personalizadas */
@@ -97,7 +105,7 @@
 
 /* Transições suaves para mudança de tema */
 * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Animação para o toggle de tema */
@@ -131,19 +139,15 @@
 
 /* Sombras adaptáveis ao tema */
 .shadow-theme {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .shadow-theme {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color-light);
 }
 
 .shadow-theme-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color-light);
 }
 
-[data-theme="light"] .shadow-theme-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+.shadow-theme-xl {
+  box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px var(--shadow-color-light);
 }
 
 /* Efeitos especiais para elementos interativos */
@@ -153,11 +157,7 @@
 
 .interactive-element:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-[data-theme="light"] .interactive-element:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-color);
 }
 
 /* Estilo para inputs e formulários */
@@ -205,5 +205,184 @@
 
 .toast-info {
   background-color: var(--color-info);
+}
+
+/* Classes específicas para cards de tarefa */
+.task-card {
+  background: var(--gradient-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.task-card:hover {
+  border-color: var(--color-border-light);
+  box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.task-card-completed {
+  opacity: 0.7;
+}
+
+.task-card-title {
+  color: var(--color-text-primary);
+}
+
+.task-card-title-completed {
+  color: var(--color-text-muted);
+}
+
+.task-card-description {
+  color: var(--color-text-secondary);
+}
+
+.task-card-description-completed {
+  color: var(--color-text-muted);
+}
+
+.task-card-meta {
+  color: var(--color-text-muted);
+}
+
+.task-card-divider {
+  border-color: var(--color-border);
+}
+
+/* Botões de ação */
+.btn-complete {
+  background-color: rgba(10, 191, 188, 0.1);
+  color: var(--color-tealLight);
+  border: 1px solid rgba(10, 191, 188, 0.2);
+}
+
+.btn-complete:hover {
+  background-color: rgba(10, 191, 188, 0.2);
+  color: var(--color-tealLight);
+}
+
+.btn-reopen {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-reopen:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.btn-edit {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.btn-edit:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.btn-delete {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-delete:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Status badges */
+.status-completed {
+  background-color: rgba(10, 191, 188, 0.1);
+  color: var(--color-tealLight);
+}
+
+.status-overdue {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.status-due-today {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.status-due-soon {
+  background-color: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+}
+
+.status-normal {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+/* Ícones de categoria */
+.category-icon {
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+}
+
+/* Melhorias para o tema claro */
+[data-theme="light"] .task-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .task-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .modal-content {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Ajustes específicos para labels no tema claro */
+[data-theme="light"] .form-label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+[data-theme="light"] .form-label-accent {
+  color: var(--color-tealDark);
+}
+
+/* Melhor contraste para textos no tema claro */
+[data-theme="light"] .text-accent {
+  color: var(--color-tealDark);
+}
+
+[data-theme="light"] .text-accent-light {
+  color: var(--color-tealLight);
+}
+
+/* Classes específicas para títulos principais no tema claro */
+.title-gradient {
+  background: linear-gradient(135deg, #fcf7c5 0%, #0abfbc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .title-gradient {
+  background: linear-gradient(135deg, #13747d 0%, #0f4c75 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Classe específica para "Minhas Tarefas" no tema claro */
+.section-title-gradient {
+  background: linear-gradient(135deg, #fcf7c5 0%, #0abfbc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .section-title-gradient {
+  background: linear-gradient(135deg, #0f4c75 0%, #13747d 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 

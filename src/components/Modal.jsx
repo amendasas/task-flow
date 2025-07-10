@@ -1,7 +1,7 @@
 function Modal({ message, onConfirm, onCancel, modalContent, onReset }) {
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-tealLight/20 transform transition-all duration-300 scale-100">
+    <div className="fixed inset-0 modal-backdrop backdrop-blur-sm flex justify-center items-center z-50 p-4">
+      <div className="modal-content p-8 rounded-2xl shadow-theme-xl w-full max-w-md transform transition-all duration-300 scale-100">
         {/* Cabeçalho do modal com melhor tipografia */}
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-tealLight to-tealDark rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -9,7 +9,7 @@ function Modal({ message, onConfirm, onCancel, modalContent, onReset }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </div>
-          <h3 className="text-2xl font-bold text-lightYellow mb-2">{message}</h3>
+          <h3 className="text-2xl font-bold text-accent mb-2">{message}</h3>
           <div className="w-16 h-1 bg-gradient-to-r from-tealLight to-tealDark rounded-full mx-auto"></div>
         </div>
 

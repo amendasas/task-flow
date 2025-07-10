@@ -13,8 +13,7 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
     if (task.completed) {
       return {
         text: "Concluída",
-        color: "text-tealLight",
-        bgColor: "bg-tealLight/10",
+        className: "status-completed",
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -28,8 +27,7 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
     if (daysRemaining < 0) {
       return {
         text: `${Math.abs(daysRemaining)} dias atrasada`,
-        color: "text-red-400",
-        bgColor: "bg-red-500/10",
+        className: "status-overdue",
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -41,8 +39,7 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
     if (daysRemaining === 0) {
       return {
         text: "Vence hoje",
-        color: "text-orange-400",
-        bgColor: "bg-orange-500/10",
+        className: "status-due-today",
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -54,8 +51,7 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
     if (daysRemaining <= 3) {
       return {
         text: `${daysRemaining} dias restantes`,
-        color: "text-yellow-400",
-        bgColor: "bg-yellow-500/10",
+        className: "status-due-soon",
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -66,8 +62,7 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
 
     return {
       text: `${daysRemaining} dias restantes`,
-      color: "text-green-400",
-      bgColor: "bg-green-500/10",
+      className: "status-normal",
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -92,9 +87,9 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
   const status = getTaskStatus();
 
   return (
-    <div className={`group relative bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] border min-h-[320px] ${
-      task.completed ? "border-tealLight/30" : "border-gray-700"
-    } hover:border-tealLight/50`}>
+    <div className={`group relative task-card p-8 rounded-2xl shadow-theme transition-all duration-300 hover:shadow-theme-lg hover:scale-[1.02] min-h-[320px] ${
+      task.completed ? "task-card-completed border-tealLight/30" : ""
+    } hover:border-tealLight/50 interactive-element`}>
       
       {/* Header com categoria e status */}
       <div className="flex justify-between items-start mb-4">
@@ -102,16 +97,16 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
         {taskCategory && (
           <div className="flex items-center space-x-2">
             <span className={`w-3 h-3 rounded-full ${taskCategory.color}`}></span>
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+            <span className="text-xs font-medium task-card-meta uppercase tracking-wide">
               {taskCategory.name}
             </span>
           </div>
         )}
         
         {/* Status */}
-        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${status.bgColor}`}>
-          <span className={status.color}>{status.icon}</span>
-          <span className={`text-xs font-medium ${status.color}`}>
+        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${status.className}`}>
+          <span>{status.icon}</span>
+          <span className="text-xs font-medium">
             {status.text}
           </span>
         </div>
@@ -119,15 +114,15 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
 
       {/* Título */}
       <h3 className={`text-2xl font-bold mb-3 leading-tight ${
-        task.completed ? "text-gray-400 line-through" : "text-white"
+        task.completed ? "task-card-title-completed line-through" : "task-card-title"
       }`}>
         {task.title}
       </h3>
 
       {/* Descrição */}
       {task.description && (
-        <p className={`text-gray-300 mb-6 leading-relaxed ${
-          task.completed ? "text-gray-500" : ""
+        <p className={`mb-6 leading-relaxed ${
+          task.completed ? "task-card-description-completed" : "task-card-description"
         }`}>
           {task.description}
         </p>
@@ -137,27 +132,27 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
       <div className="space-y-3 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-tealDark/30 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 category-icon rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-tealLight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide">Vencimento</p>
-              <p className="text-sm font-semibold text-white">{formatDate(task.dueDate)}</p>
+              <p className="text-xs task-card-meta uppercase tracking-wide">Vencimento</p>
+              <p className="text-sm font-semibold task-card-title">{formatDate(task.dueDate)}</p>
             </div>
           </div>
 
           {task.createdAt && (
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-600/30 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 category-icon rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 task-card-meta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wide">Criada em</p>
-                <p className="text-sm font-semibold text-gray-300">
+                <p className="text-xs task-card-meta uppercase tracking-wide">Criada em</p>
+                <p className="text-sm font-semibold task-card-description">
                   {formatDate(new Date(task.createdAt).toISOString().split('T')[0])}
                 </p>
               </div>
@@ -167,13 +162,13 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
 
         {task.completed && task.completedDate && (
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-tealLight/30 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-tealLight/20 border border-tealLight/30 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-tealLight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide">Concluída em</p>
+              <p className="text-xs task-card-meta uppercase tracking-wide">Concluída em</p>
               <p className="text-sm font-semibold text-tealLight">
                 {formatDate(new Date(task.completedDate).toISOString().split('T')[0])}
               </p>
@@ -183,15 +178,13 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
       </div>
 
       {/* Botões de ação */}
-      <div className="flex justify-between items-center pt-4 border-t border-gray-700/50">
+      <div className="flex justify-between items-center pt-4 border-t task-card-divider">
         <div className="flex space-x-2">
           {/* Botão de completar/reabrir */}
           <button
             onClick={onComplete}
             className={`group/btn flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-              task.completed
-                ? "bg-gray-600/50 hover:bg-gray-500/50 text-gray-300 hover:text-white"
-                : "bg-tealDark/50 hover:bg-tealLight/50 text-tealLight hover:text-white"
+              task.completed ? "btn-reopen" : "btn-complete"
             }`}
             title={task.completed ? "Reabrir tarefa" : "Marcar como concluída"}
           >
@@ -215,7 +208,7 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
           {/* Botão de editar */}
           <button
             onClick={onEdit}
-            className="group/btn flex items-center space-x-2 px-4 py-2 bg-blue-600/50 hover:bg-blue-500/50 text-blue-300 hover:text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105"
+            className="group/btn flex items-center space-x-2 px-4 py-2 btn-edit rounded-xl font-medium transition-all duration-300 transform hover:scale-105"
             title="Editar tarefa"
           >
             <svg className="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,7 +221,7 @@ function TaskCard({ task, onDelete, onComplete, onEdit, categories }) {
         {/* Botão de excluir */}
         <button
           onClick={onDelete}
-          className="group/btn flex items-center space-x-2 px-4 py-2 bg-red-600/50 hover:bg-red-500/50 text-red-300 hover:text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105"
+          className="group/btn flex items-center space-x-2 px-4 py-2 btn-delete rounded-xl font-medium transition-all duration-300 transform hover:scale-105"
           title="Excluir tarefa"
         >
           <svg className="w-4 h-4 transition-transform group-hover/btn:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">

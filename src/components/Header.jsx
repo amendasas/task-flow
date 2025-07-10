@@ -14,7 +14,7 @@ function Header({ setIsAddingTask }) {
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-lightYellow to-tealLight bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold title-gradient">
                 Task Flow
               </h1>
               <p className="text-theme-muted text-sm">

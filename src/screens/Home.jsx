@@ -7,12 +7,8 @@ import Footer from "../components/Footer";
 import SearchAndFilters from "../components/SearchAndFilters";
 import { useTaskStorage } from "../hooks/useLocalStorage";
 import { useToast } from "../components/Toast";
-import { useTheme } from "../hooks/useTheme";
 
 function Home() {
-  // Hook de tema
-  const { isDark } = useTheme();
-
   // Categorias predefinidas
   const categories = [
     { id: 'trabalho', name: 'Trabalho', color: 'bg-blue-500' },
@@ -324,7 +320,7 @@ function Home() {
     <div className="space-y-6">
       {/* Campo de título */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-lightYellow">
+        <label className="block text-sm font-semibold form-label-accent">
           Título da Tarefa
         </label>
         <input
@@ -353,7 +349,7 @@ function Home() {
 
       {/* Campo de categoria */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-lightYellow">
+        <label className="block text-sm font-semibold form-label-accent">
           Categoria
         </label>
         <select
@@ -373,7 +369,7 @@ function Home() {
 
       {/* Campo de descrição */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-lightYellow">
+        <label className="block text-sm font-semibold form-label-accent">
           Descrição (Opcional)
         </label>
         <textarea
@@ -396,7 +392,7 @@ function Home() {
 
       {/* Campo de data */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-lightYellow">
+        <label className="block text-sm font-semibold form-label-accent">
           Data de Vencimento
         </label>
         <input
@@ -432,7 +428,7 @@ function Home() {
         
         {/* Cabeçalho da seção */}
         <div className="text-center mb-12">
-          <h2 className="text-5xl font-bold bg-gradient-to-r from-lightYellow to-tealLight bg-clip-text text-transparent mb-4">
+          <h2 className="text-5xl font-bold section-title-gradient mb-4">
             Minhas Tarefas
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-tealLight to-tealDark rounded-full mx-auto mb-6"></div>
@@ -557,7 +553,7 @@ function Home() {
                 <p className="text-theme-secondary text-lg">
                   Tem certeza que deseja excluir a tarefa
                 </p>
-                <p className="text-lightYellow font-semibold text-xl mt-2">
+                <p className="text-accent font-semibold text-xl mt-2">
                   "{taskToDelete.title}"?
                 </p>
                 <p className="text-red-400 text-sm mt-4">
