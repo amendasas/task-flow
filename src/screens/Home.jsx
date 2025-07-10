@@ -7,8 +7,12 @@ import Footer from "../components/Footer";
 import SearchAndFilters from "../components/SearchAndFilters";
 import { useTaskStorage } from "../hooks/useLocalStorage";
 import { useToast } from "../components/Toast";
+import { useTheme } from "../hooks/useTheme";
 
 function Home() {
+  // Hook de tema
+  const { isDark } = useTheme();
+
   // Categorias predefinidas
   const categories = [
     { id: 'trabalho', name: 'Trabalho', color: 'bg-blue-500' },
@@ -333,15 +337,15 @@ function Home() {
             setTitleError(false);
           }}
           maxLength={50}
-          className={`w-full p-4 bg-gray-800 text-white rounded-xl border-2 focus:outline-none text-lg transition-all duration-300 placeholder-gray-400 ${
-            titleError ? "border-red-500 animate-pulse" : "border-gray-600 focus:border-tealLight"
+          className={`form-input w-full p-4 rounded-xl border-2 focus:outline-none text-lg transition-all duration-300 ${
+            titleError ? "border-red-500 animate-pulse" : "focus:border-tealLight"
           }`}
         />
         <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-400">
-            {titleError && <span className="text-red-400">Título é obrigatório</span>}
+          <div className="text-sm text-theme-muted">
+            {titleError && <span className="text-red-400">⚠ Título é obrigatório</span>}
           </div>
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-theme-muted">
             {newTask.title.length}/50
           </div>
         </div>
@@ -356,7 +360,7 @@ function Home() {
           name="category"
           value={newTask.category}
           onChange={handleFormChange}
-          className="w-full p-4 bg-gray-800 text-white rounded-xl border-2 border-gray-600 focus:border-tealLight focus:outline-none text-lg transition-all duration-300"
+          className="form-input w-full p-4 rounded-xl border-2 focus:outline-none text-lg transition-all duration-300"
         >
           <option value="">Selecione uma categoria</option>
           {categories.map((category) => (
@@ -383,9 +387,9 @@ function Home() {
           }}
           maxLength={150}
           rows="3"
-          className="w-full p-4 bg-gray-800 text-white rounded-xl border-2 border-gray-600 focus:border-tealLight focus:outline-none text-lg overflow-hidden resize-none placeholder-gray-400 transition-all duration-300"
+          className="form-input w-full p-4 rounded-xl border-2 focus:outline-none text-lg overflow-hidden resize-none transition-all duration-300"
         />
-        <div className="text-right text-sm text-gray-400">
+        <div className="text-right text-sm text-theme-muted">
           {newTask.description.length}/150
         </div>
       </div>
@@ -404,20 +408,20 @@ function Home() {
             setDueDateError(false);
             setPastDateError(false);
           }}
-          className={`w-full p-4 bg-gray-800 text-white rounded-xl border-2 focus:outline-none text-lg transition-all duration-300 ${
-            dueDateError || pastDateError ? "border-red-500 animate-pulse" : "border-gray-600 focus:border-tealLight"
+          className={`form-input w-full p-4 rounded-xl border-2 focus:outline-none text-lg transition-all duration-300 ${
+            dueDateError || pastDateError ? "border-red-500 animate-pulse" : ""
           }`}
         />
         <div className="text-sm">
-          {dueDateError && <span className="text-red-400">Data é obrigatória</span>}
-          {pastDateError && <span className="text-red-400">Escolha uma data futura ou atual</span>}
+          {dueDateError && <span className="text-red-400">⚠ Data é obrigatória</span>}
+          {pastDateError && <span className="text-red-400">⚠ Escolha uma data futura ou atual</span>}
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
+    <div className="min-h-screen bg-theme-primary flex flex-col">
       <Header setIsAddingTask={setIsAddingTask} />
       
       {/* Container de notificações */}
@@ -437,18 +441,18 @@ function Home() {
           <div className="mb-6">
             <button
               onClick={toggleSortType}
-              className="group inline-flex items-center space-x-3 bg-gray-800/50 hover:bg-gray-700/50 px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
+              className="group inline-flex items-center space-x-3 bg-theme-secondary hover:bg-theme-tertiary px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 border border-theme interactive-element"
             >
               <svg className="w-5 h-5 text-tealLight transition-transform group-hover:rotate-180 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
               </svg>
-              <span className="text-gray-300 text-sm font-medium">
+              <span className="text-theme-secondary text-sm font-medium">
                 {sortType === 'priority' 
                   ? 'Ordenado por prioridade' 
                   : 'Ordenado por data de criação'
                 }
               </span>
-              <svg className="w-4 h-4 text-gray-400 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-theme-muted transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
             </button>
@@ -496,16 +500,16 @@ function Home() {
         {/* Lista de tarefas */}
         {sortedTasks.length === 0 ? (
           <div className="text-center py-20 mt-12">
-            <div className="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-24 h-24 bg-theme-tertiary rounded-full flex items-center justify-center mx-auto mb-6 border border-theme">
+              <svg className="w-12 h-12 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-400 mb-2">
+            <h3 className="text-2xl font-bold text-theme-secondary mb-2">
               {searchTerm ? "Nenhuma tarefa encontrada" : 
                showCompleted ? "Nenhuma tarefa concluída" : "Nenhuma tarefa pendente"}
             </h3>
-            <p className="text-gray-500 text-lg">
+            <p className="text-theme-muted text-lg">
               {searchTerm ? `Tente pesquisar por "${searchTerm}" com outros filtros` :
                showCompleted ? "Complete algumas tarefas para vê-las aqui!" : 
                "Clique em 'Nova Tarefa' para começar!"}
@@ -516,7 +520,7 @@ function Home() {
                   setSearchTerm('');
                   setSelectedCategory('');
                 }}
-                className="mt-4 px-6 py-2 bg-tealDark hover:bg-tealLight text-white rounded-xl transition-all duration-300"
+                className="mt-4 px-6 py-2 bg-tealDark hover:bg-tealLight text-white rounded-xl transition-all duration-300 interactive-element"
               >
                 Limpar Filtros
               </button>
@@ -550,7 +554,7 @@ function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </div>
-                <p className="text-gray-300 text-lg">
+                <p className="text-theme-secondary text-lg">
                   Tem certeza que deseja excluir a tarefa
                 </p>
                 <p className="text-lightYellow font-semibold text-xl mt-2">
