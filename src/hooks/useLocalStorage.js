@@ -1,97 +1,84 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-/**
- * Hook personalizado para gerenciar dados no localStorage
- * @param {string} key - Chave para armazenar no localStorage
- * @param {any} initialValue - Valor inicial se não houver dados no localStorage
- * @returns {[any, function]} - [valor, função para atualizar]
- */
-export function useLocalStorage(key, initialValue) {
-  // Estado para armazenar o valor
-  const [storedValue, setStoredValue] = useState(() => {
+// Hook personalizado para gerenciar tarefas no localStorage
+export const useTaskStorage = (defaultTasks = []) => {
+  const [tasks, setTasks] = useState(() => {
     try {
-      // Tenta obter o item do localStorage
-      const item = window.localStorage.getItem(key);
-      // Retorna o valor parseado ou o valor inicial
-      return item ? JSON.parse(item) : initialValue;
+      const savedTasks = localStorage.getItem('taskflow-tasks');
+      if (savedTasks) {
+        const parsedTasks = JSON.parse(savedTasks);
+        return parsedTasks.length > 0 ? parsedTasks : defaultTasks;
+      }
+      return defaultTasks;
     } catch (error) {
-      // Se houver erro, retorna o valor inicial
-      console.error(`Erro ao ler localStorage para a chave "${key}":`, error);
-      return initialValue;
+      console.error('Erro ao carregar tarefas do localStorage:', error);
+      return defaultTasks;
     }
   });
 
-  // Função para atualizar o valor
-  const setValue = (value) => {
+  // Salvar tarefas no localStorage sempre que houver mudanças
+  useEffect(() => {
     try {
-      // Permite que value seja uma função como no useState
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      // Salva no estado
-      setStoredValue(valueToStore);
-      
-      // Salva no localStorage
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      localStorage.setItem('taskflow-tasks', JSON.stringify(tasks));
     } catch (error) {
-      // Se houver erro, apenas loga
-      console.error(`Erro ao salvar no localStorage para a chave "${key}":`, error);
+      console.error('Erro ao salvar tarefas no localStorage:', error);
     }
-  };
+  }, [tasks]);
 
-  return [storedValue, setValue];
-}
-
-/**
- * Hook para gerenciar especificamente as tarefas no localStorage
- * @param {Array} defaultTasks - Tarefas padrão se não houver dados salvos
- * @returns {[Array, function]} - [tarefas, função para atualizar tarefas]
- */
-export function useTaskStorage(defaultTasks = []) {
-  const [tasks, setTasks] = useLocalStorage('taskflow-tasks', defaultTasks);
-
-  // Função para adicionar uma tarefa
+  // Função para adicionar uma nova tarefa
   const addTask = (newTask) => {
     setTasks(prevTasks => [...prevTasks, newTask]);
   };
 
-  // Função para atualizar uma tarefa
-  const updateTask = (taskId, updatedTask) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.id === taskId ? { ...task, ...updatedTask } : task
+  // Função para atualizar uma tarefa existente
+  const updateTask = (taskId, updatedData) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, ...updatedData } : task
       )
     );
   };
 
-  // Função para deletar uma tarefa
+  // Função para excluir uma tarefa
   const deleteTask = (taskId) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
   };
 
-  // Função para marcar/desmarcar como concluída
+  // Função para alternar o status de conclusão de uma tarefa
   const toggleTaskCompletion = (taskId) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.id === taskId 
-          ? { 
-              ...task, 
-              completed: !task.completed,
-              completedDate: !task.completed 
-                ? new Date().toISOString().split("T")[0] 
-                : null
-            } 
-          : task
-      )
+    setTasks(prevTasks =>
+      prevTasks.map(task => {
+        if (task.id === taskId) {
+          const isCompleting = !task.completed;
+          return {
+            ...task,
+            completed: isCompleting,
+            completedDate: isCompleting ? new Date().toISOString() : null
+          };
+        }
+        return task;
+      })
     );
+  };
+
+  // Função para limpar todas as tarefas
+  const clearAllTasks = () => {
+    setTasks([]);
+  };
+
+  // Função para importar tarefas (substituir todas)
+  const importTasks = (newTasks) => {
+    setTasks(newTasks);
   };
 
   return {
     tasks,
-    setTasks,
     addTask,
     updateTask,
     deleteTask,
-    toggleTaskCompletion
+    toggleTaskCompletion,
+    clearAllTasks,
+    importTasks
   };
-}
+};
 

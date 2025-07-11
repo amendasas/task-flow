@@ -1,12 +1,19 @@
-import React from "react";
-import Home from "./screens/Home";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './screens/Home';
+import Dashboard from './components/Dashboard';
 
 function App() {
   return (
-    <div className="bg-dark text-lightYellow min-h-screen flex flex-col">
-      <Home />
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
 export default App;
+

@@ -1,4 +1,4 @@
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../hooks/useTheme.js";
 
 function ThemeToggle() {
   const { isDark, toggleTheme } = useTheme();
@@ -61,4 +61,3 @@ function ThemeToggle() {
 }
 
 export default ThemeToggle;
-

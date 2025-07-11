@@ -176,6 +176,22 @@
   color: var(--color-text-muted);
 }
 
+/* Labels de formulário */
+.form-label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.form-label-accent {
+  color: var(--color-tealLight);
+  font-weight: 600;
+}
+
+/* Texto com cor de destaque */
+.text-accent {
+  color: var(--color-tealLight);
+}
+
 /* Estilo para modais */
 .modal-backdrop {
   background-color: rgba(0, 0, 0, 0.5);
